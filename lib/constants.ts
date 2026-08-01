@@ -64,4 +64,8 @@ export const CONDITIONS: Condition[] = [
 export const CURRENCY = 'GBP';
 export const CURRENCY_SYMBOL = '£';
 
+// Flat UK postage added at checkout (in pounds). All prices across the shop are
+// in GBP (£).
+export const POSTAGE = 3.99;
+
 export const STORAGE_BUCKET = 'listing-images';

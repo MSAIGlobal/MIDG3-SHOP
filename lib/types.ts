@@ -28,6 +28,14 @@ export interface Listing {
   seller_id?: string | null;
 }
 
+export interface Testimonial {
+  id: string;
+  quote: string;
+  author: string | null;
+  rating: number; // 1–5
+  created_at: string;
+}
+
 export interface Profile {
   id: string;
   email: string;
