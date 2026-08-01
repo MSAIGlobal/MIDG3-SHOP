@@ -1,6 +1,7 @@
 import 'server-only';
 import { createClient } from './supabase/server';
 import { OWNER_EMAIL } from './constants';
+import { isAdminSession, adminEmail } from './admin';
 
 export interface SessionUser {
   id: string;
@@ -9,8 +10,13 @@ export interface SessionUser {
 }
 
 // Reads the current signed-in user on the server. The shop owner is whoever
-// signs in with OWNER_EMAIL (or anyone flagged is_admin in the DB).
+// holds a valid fixed-credential admin session, signs in with OWNER_EMAIL, or
+// is flagged is_admin in the DB. The admin session works without Supabase.
 export async function getSessionUser(): Promise<SessionUser | null> {
+  if (isAdminSession()) {
+    return { id: 'owner-admin', email: adminEmail(), isOwner: true };
+  }
+
   const supabase = createClient();
   if (!supabase) return null;
 

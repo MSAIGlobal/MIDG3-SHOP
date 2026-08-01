@@ -1,15 +1,13 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
-import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { SellForm } from '@/components/SellForm';
 
 export const metadata: Metadata = { title: 'Add an item' };
 
 export default async function SellPage() {
-  if (!isSupabaseConfigured) redirect('/login');
   const user = await getSessionUser();
-  if (!user) redirect('/login?next=/sell');
+  if (!user) redirect('/midge?next=/sell');
   if (!user.isOwner) redirect('/');
 
   return (

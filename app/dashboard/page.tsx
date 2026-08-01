@@ -4,16 +4,14 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { getListings } from '@/lib/data';
 import { createClient } from '@/lib/supabase/server';
-import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { ListingAdminRow } from '@/components/ListingAdminRow';
 import { PlusIcon } from '@/components/icons';
 
 export const metadata: Metadata = { title: 'Your shop' };
 
 export default async function DashboardPage() {
-  if (!isSupabaseConfigured) redirect('/login');
   const user = await getSessionUser();
-  if (!user) redirect('/login?next=/dashboard');
+  if (!user) redirect('/midge?next=/dashboard');
   if (!user.isOwner) redirect('/');
 
   const listings = await getListings({ includeSold: true, sort: 'newest' });
