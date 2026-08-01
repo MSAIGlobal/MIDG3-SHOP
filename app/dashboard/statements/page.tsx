@@ -9,13 +9,11 @@ import { HmrcStatements } from '@/components/HmrcStatements';
 export const metadata: Metadata = { title: 'HMRC statements', robots: { index: false } };
 
 export default async function StatementsPage() {
-  // When the backend is live this is owner-only; before then we allow a preview
-  // with sample orders so the HMRC format can be seen (sample data is harmless).
-  if (isSupabaseConfigured) {
-    const user = await getSessionUser();
-    if (!user) redirect('/login?next=/dashboard/statements');
-    if (!user.isOwner) redirect('/');
-  }
+  // Owner-only (admin login or Supabase owner). Shows sample orders as a preview
+  // until the backend is connected.
+  const user = await getSessionUser();
+  if (!user) redirect('/midge?next=/dashboard/statements');
+  if (!user.isOwner) redirect('/');
 
   const orders = await getOrders();
 

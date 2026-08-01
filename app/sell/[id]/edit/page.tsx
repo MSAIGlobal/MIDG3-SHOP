@@ -2,15 +2,13 @@ import type { Metadata } from 'next';
 import { redirect, notFound } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { getListing } from '@/lib/data';
-import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { SellForm } from '@/components/SellForm';
 
 export const metadata: Metadata = { title: 'Edit item' };
 
 export default async function EditListingPage({ params }: { params: { id: string } }) {
-  if (!isSupabaseConfigured) redirect('/login');
   const user = await getSessionUser();
-  if (!user) redirect(`/login?next=/sell/${params.id}/edit`);
+  if (!user) redirect(`/midge?next=/sell/${params.id}/edit`);
   if (!user.isOwner) redirect('/');
 
   const listing = await getListing(params.id);
