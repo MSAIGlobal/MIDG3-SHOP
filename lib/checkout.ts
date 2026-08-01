@@ -1,7 +1,7 @@
 'use client';
 
 import { createClient } from './supabase/client';
-import { revolutPayLink } from './payments';
+import { payLinkFor } from './payments';
 import { POSTAGE, CURRENCY } from './constants';
 import type { CartItem } from './types';
 
@@ -10,6 +10,7 @@ export interface CheckoutResult {
   itemTotal: number;
   postage: number;
   total: number;
+  paymentMethod: string;
   payLink: string | null;
   recorded: boolean; // true if persisted to the backend (for HMRC statements)
 }
@@ -28,13 +29,14 @@ function makeRef(): string {
 // backend too — it still returns the pay link so Buy Now is never dead.
 export async function placeOrder(
   items: CartItem[],
-  buyer: { name?: string; email?: string }
+  buyer: { name?: string; email?: string; paymentMethod: string }
 ): Promise<CheckoutResult> {
   const itemTotal = items.reduce((sum, i) => sum + i.price, 0);
   const postage = items.length ? POSTAGE : 0;
   const total = itemTotal + postage;
   const ref = makeRef();
-  const payLink = revolutPayLink(total, CURRENCY);
+  const paymentMethod = buyer.paymentMethod;
+  const payLink = payLinkFor(paymentMethod, total, CURRENCY);
 
   let recorded = false;
   const supabase = createClient();
@@ -49,6 +51,7 @@ export async function placeOrder(
         postage,
         total,
         currency: CURRENCY,
+        payment_method: paymentMethod,
         status: 'placed',
       })
       .select('id')
@@ -66,5 +69,5 @@ export async function placeOrder(
     }
   }
 
-  return { ref, itemTotal, postage, total, payLink, recorded };
+  return { ref, itemTotal, postage, total, paymentMethod, payLink, recorded };
 }

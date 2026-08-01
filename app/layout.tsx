@@ -7,7 +7,10 @@ import { CartProvider } from '@/lib/cart';
 import { getSessionUser } from '@/lib/auth';
 import { SHOP_NAME, SHOP_TAGLINE } from '@/lib/constants';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://midg3-shop.netlify.app';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: `${SHOP_NAME} — ${SHOP_TAGLINE}`,
     template: `%s · ${SHOP_NAME}`,

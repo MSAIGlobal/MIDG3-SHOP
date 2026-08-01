@@ -98,6 +98,7 @@ create table if not exists public.orders (
   postage      numeric(10,2) not null default 0,
   total        numeric(10,2) not null default 0,
   currency     text not null default 'GBP',
+  payment_method text,
   status       text not null default 'placed'
                  check (status in ('placed','paid','cancelled','refunded')),
   created_at   timestamptz not null default now()

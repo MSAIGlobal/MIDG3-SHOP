@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { useCart } from '@/lib/cart';
 import { placeOrder, type CheckoutResult } from '@/lib/checkout';
 import { formatPrice } from '@/lib/format';
-import { POSTAGE } from '@/lib/constants';
+import { POSTAGE, PAYMENT_METHODS, paymentMethodLabel, type PaymentMethodId } from '@/lib/constants';
 import { CardIcon, CheckIcon } from '@/components/icons';
 
 export default function BasketPage() {
   const { items, subtotal, remove, clear, ready } = useCart();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [method, setMethod] = useState<PaymentMethodId | ''>('');
   const [busy, setBusy] = useState(false);
   const [placed, setPlaced] = useState<CheckoutResult | null>(null);
 
@@ -20,18 +21,17 @@ export default function BasketPage() {
   const total = subtotal + postage;
 
   async function checkout() {
-    if (!items.length || busy) return;
+    if (!items.length || !method || busy) return;
     setBusy(true);
-    const result = await placeOrder(items, { name, email });
+    const result = await placeOrder(items, { name, email, paymentMethod: method });
     setPlaced(result);
     clear();
     setBusy(false);
-    // Open Revolut straight away when available.
-    if (result.payLink) window.open(result.payLink, '_blank', 'noopener');
   }
 
   // ── Order confirmation ──────────────────────────────────────────────────
   if (placed) {
+    const methodLabel = paymentMethodLabel(placed.paymentMethod);
     return (
       <div className="mx-auto max-w-md space-y-5 py-6 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
@@ -40,7 +40,8 @@ export default function BasketPage() {
         <div>
           <h1 className="font-display text-2xl font-extrabold text-plum">Order placed! 💕</h1>
           <p className="mt-1 text-sm text-plum/60">
-            Your reference is <span className="font-semibold text-plum">{placed.ref}</span>
+            Reference <span className="font-semibold text-plum">{placed.ref}</span> · Paying by{' '}
+            <span className="font-semibold text-plum">{methodLabel}</span>
           </p>
         </div>
 
@@ -52,20 +53,25 @@ export default function BasketPage() {
           </div>
         </div>
 
+        {/* Payment instructions per chosen method. The pay button is a real link
+            the buyer taps — reliable on mobile (no popup blockers). */}
         {placed.payLink ? (
           <>
             <a href={placed.payLink} target="_blank" rel="noreferrer" className="btn bg-[#0666eb] text-white shadow-soft hover:bg-[#0552c2] w-full">
-              <CardIcon width={20} height={20} /> Pay {formatPrice(placed.total)} with Revolut
+              <CardIcon width={20} height={20} /> Pay {formatPrice(placed.total)} with {methodLabel}
             </a>
             <p className="text-xs text-plum/50">
-              Didn’t open? Tap the button above to pay securely via Revolut. Please quote{' '}
-              <span className="font-semibold">{placed.ref}</span> as the payment reference so Midge can match it up.
+              Please quote <span className="font-semibold">{placed.ref}</span> as the payment reference so Midge can match it up.
             </p>
           </>
         ) : (
           <p className="rounded-2xl bg-midg-50 p-4 text-sm text-plum/70">
-            Thank you! Midge will be in touch to arrange payment and postage. Please keep your
-            reference <span className="font-semibold">{placed.ref}</span>.
+            {placed.paymentMethod === 'collection'
+              ? 'Pay cash when you collect — Midge will be in touch to arrange a time.'
+              : placed.paymentMethod === 'bank'
+              ? 'Midge will send you her bank transfer details to complete payment.'
+              : `Midge will send you a ${methodLabel} payment request.`}{' '}
+            Please keep your reference <span className="font-semibold">{placed.ref}</span>.
           </p>
         )}
 
@@ -86,7 +92,7 @@ export default function BasketPage() {
     );
   }
 
-  // ── Basket ──────────────────────────────────────────────────────────────
+  // ── Basket + checkout ───────────────────────────────────────────────────
   return (
     <div className="mx-auto max-w-2xl space-y-6 py-2">
       <h1 className="font-display text-2xl font-extrabold text-plum">Your basket</h1>
@@ -110,12 +116,51 @@ export default function BasketPage() {
         ))}
       </div>
 
-      {/* Optional buyer details for Midge's records */}
+      {/* Your details */}
       <div className="card space-y-3 p-5">
-        <h2 className="text-sm font-bold text-plum">Your details <span className="font-normal text-plum/40">· optional, helps Midge post your order</span></h2>
+        <h2 className="text-sm font-bold text-plum">Your details <span className="font-normal text-plum/40">· so Midge can post your order</span></h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <input className="input" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
           <input className="input" type="email" placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+      </div>
+
+      {/* How would you like to pay? (required) */}
+      <div className="card space-y-3 p-5">
+        <h2 className="text-sm font-bold text-plum">How would you like to pay? <span className="font-normal text-midg-500">· required</span></h2>
+        <div className="grid gap-2.5">
+          {PAYMENT_METHODS.map((m) => {
+            const active = method === m.id;
+            return (
+              <label
+                key={m.id}
+                className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-3.5 transition ${
+                  active ? 'border-midg-400 bg-midg-50 ring-2 ring-midg-100' : 'border-midg-100 hover:bg-midg-50/50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="payment"
+                  value={m.id}
+                  checked={active}
+                  onChange={() => setMethod(m.id)}
+                  className="sr-only"
+                />
+                <span className="text-xl" aria-hidden>{m.emoji}</span>
+                <span className="flex-1">
+                  <span className="block text-sm font-semibold text-plum">{m.label}</span>
+                  <span className="block text-xs text-plum/50">{m.desc}</span>
+                </span>
+                <span
+                  className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+                    active ? 'border-midg-500 bg-midg-500 text-white' : 'border-midg-200'
+                  }`}
+                >
+                  {active && <CheckIcon width={14} height={14} />}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </div>
 
@@ -128,10 +173,15 @@ export default function BasketPage() {
         </div>
       </div>
 
-      <button onClick={checkout} disabled={busy} className="btn bg-[#0666eb] text-white shadow-soft hover:bg-[#0552c2] w-full">
-        <CardIcon width={20} height={20} /> {busy ? 'Placing order…' : `Checkout · pay ${formatPrice(total)}`}
+      <button
+        onClick={checkout}
+        disabled={busy || !method}
+        className="btn bg-[#0666eb] text-white shadow-soft hover:bg-[#0552c2] w-full"
+      >
+        <CardIcon width={20} height={20} />
+        {busy ? 'Placing order…' : !method ? 'Choose a payment method' : `Place order · ${formatPrice(total)}`}
       </button>
-      <p className="text-center text-xs text-plum/45">Secure payment to Midge via Revolut.</p>
+      {!method && <p className="text-center text-xs text-plum/45">Please choose how you’d like to pay to continue.</p>}
     </div>
   );
 }

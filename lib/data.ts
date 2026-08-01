@@ -126,7 +126,7 @@ export async function getOrders(): Promise<Order[]> {
   const { data, error } = await supabase
     .from('orders')
     .select(
-      'id,ref,buyer_name,buyer_email,item_total,postage,total,currency,status,created_at,order_items(id,listing_id,title,price)'
+      'id,ref,buyer_name,buyer_email,item_total,postage,total,currency,payment_method,status,created_at,order_items(id,listing_id,title,price)'
     )
     .order('created_at', { ascending: false });
 
@@ -140,6 +140,7 @@ export async function getOrders(): Promise<Order[]> {
     postage: Number(row.postage),
     total: Number(row.total),
     currency: row.currency,
+    payment_method: row.payment_method ?? null,
     status: row.status,
     created_at: row.created_at,
     items: (row.order_items ?? []).map((i: any) => ({

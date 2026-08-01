@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { adminConfigured } from '@/lib/admin';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
@@ -19,6 +20,13 @@ export default async function MidgePage({
   const user = await getSessionUser();
   const next = searchParams.next || '/dashboard';
   const error = searchParams.e === '1';
+
+  // Once the backend is live, the owner signs in through the real Supabase
+  // login (so the browser session satisfies RLS for uploads). Send non-owners
+  // there instead of showing the cookie form.
+  if (isSupabaseConfigured && !user?.isOwner) {
+    redirect(`/login?next=${encodeURIComponent(next)}`);
+  }
 
   return (
     <div className="mx-auto max-w-md space-y-6 py-4">

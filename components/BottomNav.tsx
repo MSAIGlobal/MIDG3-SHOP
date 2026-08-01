@@ -14,6 +14,10 @@ interface Props {
 export function BottomNav({ isOwner, signedIn }: Props) {
   const pathname = usePathname();
 
+  // Hide the tab bar on item pages so it never covers the sticky "Buy now" bar
+  // (both are fixed to the bottom on mobile).
+  if (pathname.startsWith('/item/')) return null;
+
   const items = [
     { href: '/', label: 'Home', icon: HomeIcon },
     { href: '/shop', label: 'Shop', icon: SearchIcon },

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { getListings } from '@/lib/data';
 import { createClient } from '@/lib/supabase/server';
-import { ListingAdminRow } from '@/components/ListingAdminRow';
+import { DashboardListings } from '@/components/DashboardListings';
 import { PlusIcon } from '@/components/icons';
 
 export const metadata: Metadata = { title: 'Your shop' };
@@ -71,18 +71,16 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="card divide-y divide-midg-50">
-        {listings.length === 0 ? (
-          <div className="p-10 text-center">
-            <p className="text-4xl">🛍️</p>
-            <p className="mt-3 font-semibold text-plum">No listings yet</p>
-            <p className="mt-1 text-sm text-plum/60">Add your first item to open the shop.</p>
-            <Link href="/sell" className="btn-primary mt-5">List an item</Link>
-          </div>
-        ) : (
-          listings.map((l) => <ListingAdminRow key={l.id} listing={l} />)
-        )}
-      </div>
+      {listings.length === 0 ? (
+        <div className="card p-10 text-center">
+          <p className="text-4xl">🛍️</p>
+          <p className="mt-3 font-semibold text-plum">No listings yet</p>
+          <p className="mt-1 text-sm text-plum/60">Add your first item to open the shop.</p>
+          <Link href="/sell" className="btn-primary mt-5">List an item</Link>
+        </div>
+      ) : (
+        <DashboardListings listings={listings} />
+      )}
     </div>
   );
 }

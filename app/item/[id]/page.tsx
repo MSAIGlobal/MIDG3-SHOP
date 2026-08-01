@@ -7,16 +7,31 @@ import { BuyBar } from '@/components/BuyBar';
 import { ConditionBadge } from '@/components/Badges';
 import { ProductCard } from '@/components/ProductCard';
 import { TrustBar } from '@/components/TrustBar';
+import { ShareListing } from '@/components/ShareListing';
 import { formatPrice, timeAgo, discountPercent } from '@/lib/format';
 import { findCategory, findSubCategory, POSTAGE } from '@/lib/constants';
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const listing = await getListing(params.id);
   if (!listing) return { title: 'Item not found' };
+  const hero = listing.images[0];
+  const description = listing.description.slice(0, 155);
+  // The main photo is the hero image so shared links unfurl with it on socials.
   return {
     title: listing.title,
-    description: listing.description.slice(0, 155),
-    openGraph: { images: listing.images.slice(0, 1) },
+    description,
+    openGraph: {
+      title: `${listing.title} · MIDG3`,
+      description,
+      type: 'website',
+      images: [{ url: hero, width: 1200, height: 1200, alt: listing.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${listing.title} · MIDG3`,
+      description,
+      images: [hero],
+    },
   };
 }
 
@@ -125,6 +140,15 @@ export default async function ItemPage({ params }: { params: { id: string } }) {
           </dl>
 
           <TrustBar />
+
+          {/* Share */}
+          <div className="card p-5">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-plum/50">Share this find</h2>
+            <p className="mb-3 mt-1 text-xs text-plum/50">
+              Copy the link or post straight to socials — it shows the photo automatically.
+            </p>
+            <ShareListing id={listing.id} title={listing.title} price={listing.price} image={listing.images[0]} />
+          </div>
         </div>
       </div>
 

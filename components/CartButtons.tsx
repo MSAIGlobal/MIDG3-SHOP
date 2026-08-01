@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart';
-import { placeOrder } from '@/lib/checkout';
 import type { Listing } from '@/lib/types';
 import { BagIcon, CardIcon, CheckIcon } from './icons';
 
@@ -56,36 +54,26 @@ export function QuickAddToCart({ listing }: { listing: Listing }) {
   );
 }
 
-// One-click Buy Now — records the order and jumps straight to Revolut payment.
+// Buy Now — one tap adds the item and goes straight to checkout, where the
+// buyer picks how they'd like to pay. Plain client navigation, so it's reliable
+// on mobile (no popup blockers or async payment redirects).
 export function BuyNowButton({ listing, className = '' }: { listing: Listing; className?: string }) {
   const router = useRouter();
   const { add } = useCart();
-  const [busy, setBusy] = useState(false);
 
-  async function buyNow() {
-    if (busy) return;
-    setBusy(true);
-    const result = await placeOrder([toCartItem(listing)], {});
-    if (result.payLink) {
-      // One click → straight to payment.
-      window.location.href = result.payLink;
-    } else {
-      // No Revolut configured yet — take them to the basket to review.
-      add(toCartItem(listing));
-      router.push('/basket');
-      setBusy(false);
-    }
+  function buyNow() {
+    add(toCartItem(listing));
+    router.push('/basket?buynow=1');
   }
 
   return (
     <button
       type="button"
       onClick={buyNow}
-      disabled={busy}
       className={`btn bg-[#0666eb] text-white shadow-soft hover:bg-[#0552c2] ${className}`}
     >
       <CardIcon width={20} height={20} />
-      {busy ? 'Starting…' : 'Buy now'}
+      Buy now
     </button>
   );
 }

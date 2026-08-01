@@ -51,6 +51,7 @@ export interface Order {
   postage: number;
   total: number;
   currency: string;
+  payment_method: string | null;
   status: 'placed' | 'paid' | 'cancelled' | 'refunded';
   created_at: string;
   items: OrderItem[];
