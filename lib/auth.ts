@@ -9,7 +9,7 @@ export interface SessionUser {
 }
 
 // Reads the current signed-in user on the server. The shop owner is whoever
-// signs in with NEXT_PUBLIC_OWNER_EMAIL (or anyone flagged is_admin in the DB).
+// signs in with OWNER_EMAIL (or anyone flagged is_admin in the DB).
 export async function getSessionUser(): Promise<SessionUser | null> {
   const supabase = createClient();
   if (!supabase) return null;
