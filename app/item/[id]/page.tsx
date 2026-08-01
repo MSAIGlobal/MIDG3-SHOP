@@ -8,7 +8,7 @@ import { ConditionBadge } from '@/components/Badges';
 import { ProductCard } from '@/components/ProductCard';
 import { TrustBar } from '@/components/TrustBar';
 import { formatPrice, timeAgo, discountPercent } from '@/lib/format';
-import { CATEGORIES } from '@/lib/constants';
+import { findCategory, findSubCategory } from '@/lib/constants';
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const listing = await getListing(params.id);
@@ -26,14 +26,15 @@ export default async function ItemPage({ params }: { params: { id: string } }) {
 
   const related = await getRelatedListings(listing);
   const off = discountPercent(listing.price, listing.original_price);
-  const category = CATEGORIES.find((c) => c.slug === listing.category);
+  const category = findCategory(listing.category);
+  const sub = findSubCategory(listing.category, listing.subcategory);
 
   const details: [string, string | null][] = [
     ['Brand', listing.brand],
     ['Size', listing.size],
     ['Colour', listing.color],
     ['Condition', listing.condition],
-    ['Category', category?.label ?? listing.category],
+    ['Category', category ? `${category.label}${sub ? ` · ${sub.label}` : ''}` : listing.category],
   ];
 
   return (
@@ -46,6 +47,17 @@ export default async function ItemPage({ params }: { params: { id: string } }) {
             <Link href={`/shop?category=${category.slug}`} className="hover:text-midg-600">
               {category.label}
             </Link>
+            {sub && (
+              <>
+                {' / '}
+                <Link
+                  href={`/shop?category=${category.slug}&audience=${sub.slug}`}
+                  className="hover:text-midg-600"
+                >
+                  {sub.label}
+                </Link>
+              </>
+            )}
           </>
         )}
       </nav>

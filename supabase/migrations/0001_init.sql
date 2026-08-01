@@ -36,7 +36,8 @@ create table if not exists public.listings (
   price          numeric(10,2) not null default 0,
   original_price numeric(10,2),
   currency       text not null default 'GBP',
-  category       text not null default 'womenswear',
+  category       text not null default 'skincare',
+  subcategory    text, -- e.g. clothing audience: adults | kids | elders
   size           text,
   brand          text,
   color          text,

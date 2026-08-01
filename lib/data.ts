@@ -20,6 +20,7 @@ interface ListingRow {
   status: ListingStatus;
   created_at: string;
   seller_id: string | null;
+  subcategory: string | null;
   listing_images: { url: string; position: number }[] | null;
 }
 
@@ -36,6 +37,7 @@ function rowToListing(row: ListingRow): Listing {
     original_price: row.original_price != null ? Number(row.original_price) : null,
     currency: row.currency,
     category: row.category,
+    subcategory: row.subcategory ?? null,
     size: row.size,
     brand: row.brand,
     color: row.color,
@@ -49,6 +51,7 @@ function rowToListing(row: ListingRow): Listing {
 
 export interface ListingQuery {
   category?: string;
+  subcategory?: string;
   search?: string;
   includeSold?: boolean;
   sort?: 'newest' | 'price-asc' | 'price-desc';
@@ -59,8 +62,11 @@ export function usingLiveData(): boolean {
   return isSupabaseConfigured;
 }
 
+const LISTING_SELECT =
+  'id,title,description,price,original_price,currency,category,subcategory,size,brand,color,condition,status,created_at,seller_id,listing_images(url,position)';
+
 export async function getListings(query: ListingQuery = {}): Promise<Listing[]> {
-  const { category, search, includeSold = false, sort = 'newest' } = query;
+  const { category, subcategory, search, includeSold = false, sort = 'newest' } = query;
 
   if (!isSupabaseConfigured) {
     return filterAndSortSample(SAMPLE_LISTINGS, query);
@@ -69,14 +75,11 @@ export async function getListings(query: ListingQuery = {}): Promise<Listing[]> 
   const supabase = createClient();
   if (!supabase) return filterAndSortSample(SAMPLE_LISTINGS, query);
 
-  let q = supabase
-    .from('listings')
-    .select(
-      'id,title,description,price,original_price,currency,category,size,brand,color,condition,status,created_at,seller_id,listing_images(url,position)'
-    );
+  let q = supabase.from('listings').select(LISTING_SELECT);
 
   if (!includeSold) q = q.neq('status', 'sold');
   if (category) q = q.eq('category', category);
+  if (subcategory) q = q.eq('subcategory', subcategory);
   if (search) q = q.or(`title.ilike.%${search}%,brand.ilike.%${search}%,description.ilike.%${search}%`);
 
   if (sort === 'price-asc') q = q.order('price', { ascending: true });
@@ -100,9 +103,7 @@ export async function getListing(id: string): Promise<Listing | null> {
 
   const { data, error } = await supabase
     .from('listings')
-    .select(
-      'id,title,description,price,original_price,currency,category,size,brand,color,condition,status,created_at,seller_id,listing_images(url,position)'
-    )
+    .select(LISTING_SELECT)
     .eq('id', id)
     .maybeSingle();
 
@@ -116,10 +117,11 @@ export async function getRelatedListings(listing: Listing, limit = 4): Promise<L
 }
 
 function filterAndSortSample(listings: Listing[], query: ListingQuery): Listing[] {
-  const { category, search, includeSold = false, sort = 'newest' } = query;
+  const { category, subcategory, search, includeSold = false, sort = 'newest' } = query;
   let out = listings.slice();
   if (!includeSold) out = out.filter((l) => l.status !== 'sold');
   if (category) out = out.filter((l) => l.category === category);
+  if (subcategory) out = out.filter((l) => l.subcategory === subcategory);
   if (search) {
     const s = search.toLowerCase();
     out = out.filter(

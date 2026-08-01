@@ -17,6 +17,7 @@ export interface Listing {
   original_price: number | null; // for showing a reduction
   currency: string; // e.g. 'GBP'
   category: string;
+  subcategory: string | null; // e.g. clothing audience: adults | kids | elders
   size: string | null;
   brand: string | null;
   color: string | null;
