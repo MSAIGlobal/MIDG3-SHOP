@@ -1,16 +1,18 @@
 import Link from 'next/link';
-import { getListings } from '@/lib/data';
+import { getListings, getTestimonials } from '@/lib/data';
 import { ProductGrid } from '@/components/ProductGrid';
 import { CategoryChips } from '@/components/CategoryChips';
 import { TrustBar } from '@/components/TrustBar';
+import { TestimonialScroller } from '@/components/TestimonialScroller';
 import { FollowForm } from '@/components/FollowForm';
 import { SHOP_TAGLINE } from '@/lib/constants';
 import { SparkleIcon } from '@/components/icons';
 
 export default async function HomePage() {
-  const [newest, sold] = await Promise.all([
+  const [newest, sold, testimonials] = await Promise.all([
     getListings({ sort: 'newest' }),
     getListings({ includeSold: true }),
+    getTestimonials(),
   ]);
   const soldCount = sold.filter((l) => l.status === 'sold').length;
 
@@ -67,6 +69,19 @@ export default async function HomePage() {
       <section>
         <TrustBar />
       </section>
+
+      {/* ── Buyer feedback scroller ──────────────────────────────────────── */}
+      {testimonials.length > 0 && (
+        <section className="space-y-4">
+          <div className="text-center">
+            <h2 className="font-display text-xl font-extrabold text-plum sm:text-2xl">
+              Loved by our customers 💬
+            </h2>
+            <p className="text-sm text-plum/55">Real words from happy shoppers</p>
+          </div>
+          <TestimonialScroller testimonials={testimonials} />
+        </section>
+      )}
 
       {/* ── Follow / loyalty ─────────────────────────────────────────────── */}
       <section className="overflow-hidden rounded-4xl bg-gradient-to-br from-plum to-midg-700 px-6 py-9 text-white sm:px-10">

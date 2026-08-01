@@ -1,8 +1,8 @@
 import 'server-only';
 import { createClient } from './supabase/server';
 import { isSupabaseConfigured } from './supabase/config';
-import { SAMPLE_LISTINGS } from './sample-data';
-import type { Listing, ListingStatus } from './types';
+import { SAMPLE_LISTINGS, SAMPLE_TESTIMONIALS } from './sample-data';
+import type { Listing, ListingStatus, Testimonial } from './types';
 
 // Shape of a listing row joined with its images from Supabase.
 interface ListingRow {
@@ -114,6 +114,20 @@ export async function getListing(id: string): Promise<Listing | null> {
 export async function getRelatedListings(listing: Listing, limit = 4): Promise<Listing[]> {
   const all = await getListings({ category: listing.category });
   return all.filter((l) => l.id !== listing.id).slice(0, limit);
+}
+
+export async function getTestimonials(): Promise<Testimonial[]> {
+  if (!isSupabaseConfigured) return SAMPLE_TESTIMONIALS;
+  const supabase = createClient();
+  if (!supabase) return SAMPLE_TESTIMONIALS;
+
+  const { data, error } = await supabase
+    .from('testimonials')
+    .select('id,quote,author,rating,created_at')
+    .order('created_at', { ascending: false });
+
+  if (error || !data || data.length === 0) return SAMPLE_TESTIMONIALS;
+  return data as Testimonial[];
 }
 
 function filterAndSortSample(listings: Listing[], query: ListingQuery): Listing[] {

@@ -80,6 +80,11 @@ export default async function MidgePage() {
             </Link>
           </div>
 
+          <Link href="/dashboard/feedback" className="card flex items-center gap-3 p-4 hover:bg-midg-50">
+            <span aria-hidden>💬</span>
+            <span className="text-sm font-semibold text-plum">Buyer feedback</span>
+          </Link>
+
           <Link href="/favourites" className="card flex items-center gap-3 p-4 hover:bg-midg-50">
             <HeartIcon className="text-midg-500" />
             <span className="text-sm font-semibold text-plum">Saved items</span>

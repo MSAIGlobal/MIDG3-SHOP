@@ -1,4 +1,4 @@
-import type { Listing } from './types';
+import type { Listing, Testimonial } from './types';
 
 // Demo stock shown before the Supabase backend is connected, so the shop looks
 // alive from the very first deploy. Once real listings exist they take over.
@@ -221,4 +221,15 @@ export const SAMPLE_LISTINGS: Listing[] = [
     images: [img('photo-1576871337622-98d48d1cf531')],
     created_at: hoursAgo(200),
   },
+];
+
+// Buyer feedback quotes shown in the home-page scroller before the backend is
+// connected. Once Midge uploads real quotes they take over.
+export const SAMPLE_TESTIMONIALS: Testimonial[] = [
+  { id: 't1', quote: 'Absolutely gorgeous dress and posted so quickly. Exactly as described — will 100% buy again! 💕', author: 'Sarah M.', rating: 5, created_at: hoursAgo(30) },
+  { id: 't2', quote: 'Lovely little shop with a personal touch. The wrapping was so pretty it felt like a gift to myself.', author: 'Priya K.', rating: 5, created_at: hoursAgo(60) },
+  { id: 't3', quote: 'Great quality skincare at a brilliant price. Honest description and super friendly. Thank you Midge!', author: 'Emma T.', rating: 5, created_at: hoursAgo(90) },
+  { id: 't4', quote: 'Bought a bag for my mum and she adores it. Fab communication and speedy delivery.', author: 'Danielle R.', rating: 5, created_at: hoursAgo(120) },
+  { id: 't5', quote: 'My go-to for pre-loved treasures now. Everything arrives clean, fresh and beautifully packaged.', author: 'Aisha B.', rating: 5, created_at: hoursAgo(150) },
+  { id: 't6', quote: 'Five stars! Kids’ raincoat was spotless and such good value. Highly recommend this shop.', author: 'Laura P.', rating: 5, created_at: hoursAgo(180) },
 ];

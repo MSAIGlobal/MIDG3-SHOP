@@ -1,6 +1,6 @@
 'use client';
 
-import { CONTACT_EMAIL, WHATSAPP_NUMBER } from '@/lib/constants';
+import { CONTACT_EMAIL, POSTAGE, WHATSAPP_NUMBER } from '@/lib/constants';
 import { revolutPayLink } from '@/lib/payments';
 import { formatPrice } from '@/lib/format';
 import type { Listing } from '@/lib/types';
@@ -13,9 +13,11 @@ import { WhatsAppIcon, BagIcon, CardIcon } from './icons';
 // of the biggest conversion wins, so it never scrolls away.
 export function BuyBar({ listing }: { listing: Listing }) {
   const sold = listing.status === 'sold';
-  const payLink = revolutPayLink(listing.price, listing.currency);
+  const total = listing.price + POSTAGE;
+  // Buy now charges item price + postage via Revolut.
+  const payLink = revolutPayLink(total, listing.currency);
 
-  const msg = `Hi! I'd love to buy the "${listing.title}" (${formatPrice(listing.price)}) from MIDG3. Is it still available? 💕`;
+  const msg = `Hi! I'd love to buy the "${listing.title}" (${formatPrice(listing.price)} + ${formatPrice(POSTAGE)} postage = ${formatPrice(total)}) from MIDG3. Is it still available? 💕`;
   const waHref = WHATSAPP_NUMBER
     ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
     : null;
@@ -61,9 +63,11 @@ export function BuyBar({ listing }: { listing: Listing }) {
         )}
         <FavouriteButton listingId={listing.id} withLabel />
       </div>
-      {payLink && !sold && (
+      {!sold && (
         <p className="hidden text-xs text-plum/45 md:block">
-          Secure payment to Midge via Revolut. Pay by card or Revolut balance.
+          {formatPrice(listing.price)} + {formatPrice(POSTAGE)} postage ={' '}
+          <span className="font-semibold text-plum/70">{formatPrice(total)}</span> total
+          {payLink && '. Secure payment to Midge via Revolut.'}
         </p>
       )}
 
@@ -73,11 +77,9 @@ export function BuyBar({ listing }: { listing: Listing }) {
         style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
       >
         <div className="mx-auto flex max-w-md items-center gap-2.5">
-          <div className="shrink-0">
-            <p className="text-lg font-extrabold leading-none text-midg-600">{formatPrice(listing.price)}</p>
-            {listing.original_price && listing.original_price > listing.price && (
-              <p className="text-xs text-plum/40 line-through">{formatPrice(listing.original_price)}</p>
-            )}
+          <div className="shrink-0 leading-none">
+            <p className="text-lg font-extrabold text-midg-600">{formatPrice(listing.price)}</p>
+            <p className="mt-0.5 text-[11px] text-plum/45">+ {formatPrice(POSTAGE)} post</p>
           </div>
           {sold ? (
             <span className="btn flex-1 cursor-default bg-plum/10 text-plum/60">Sold</span>

@@ -8,7 +8,7 @@ import { ConditionBadge } from '@/components/Badges';
 import { ProductCard } from '@/components/ProductCard';
 import { TrustBar } from '@/components/TrustBar';
 import { formatPrice, timeAgo, discountPercent } from '@/lib/format';
-import { findCategory, findSubCategory } from '@/lib/constants';
+import { findCategory, findSubCategory, POSTAGE } from '@/lib/constants';
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const listing = await getListing(params.id);
@@ -84,6 +84,10 @@ export default async function ItemPage({ params }: { params: { id: string } }) {
               </span>
             )}
           </div>
+          <p className="text-sm text-plum/55">
+            + {formatPrice(POSTAGE)} UK postage ·{' '}
+            <span className="font-semibold text-plum">{formatPrice(listing.price + POSTAGE)}</span> total
+          </p>
 
           {/* Scarcity — resale items are unique, and that urgency sells. */}
           {listing.status === 'active' && (

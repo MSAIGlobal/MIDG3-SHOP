@@ -88,6 +88,17 @@ create table if not exists public.inquiries (
   created_at  timestamptz not null default now()
 );
 
+-- ── Testimonials (buyer feedback quotes) ─────────────────────────────────────
+create table if not exists public.testimonials (
+  id          uuid primary key default gen_random_uuid(),
+  quote       text not null,
+  author      text,
+  rating      int not null default 5 check (rating between 1 and 5),
+  created_at  timestamptz not null default now()
+);
+create index if not exists testimonials_created_idx
+  on public.testimonials (created_at desc);
+
 -- ── Triggers ─────────────────────────────────────────────────────────────────
 -- Auto-create a profile when a user signs up; promote to owner if their email
 -- matches app_config.owner_email.
@@ -149,6 +160,7 @@ alter table public.listing_images enable row level security;
 alter table public.favourites     enable row level security;
 alter table public.followers      enable row level security;
 alter table public.inquiries      enable row level security;
+alter table public.testimonials   enable row level security;
 
 -- Profiles: a user sees & edits only their own row.
 create policy "profiles self read"   on public.profiles for select using (auth.uid() = id);
@@ -177,6 +189,11 @@ create policy "followers owner read"    on public.followers for select using (pu
 -- Enquiries: anyone can send; owner reads.
 create policy "inquiries public insert" on public.inquiries for insert with check (true);
 create policy "inquiries owner read"    on public.inquiries for select using (public.is_admin());
+
+-- Testimonials: everyone can read the feedback wall; only the owner manages it.
+create policy "testimonials public read" on public.testimonials for select using (true);
+create policy "testimonials owner write" on public.testimonials for all
+  using (public.is_admin()) with check (public.is_admin());
 
 -- ════════════════════════════════════════════════════════════════════════════
 -- Storage — product photos
