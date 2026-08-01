@@ -33,6 +33,7 @@ export function SellForm({ initial }: Props) {
   const [price, setPrice] = useState(initial?.price?.toString() ?? '');
   const [originalPrice, setOriginalPrice] = useState(initial?.original_price?.toString() ?? '');
   const [category, setCategory] = useState(initial?.category ?? CATEGORIES[0].slug);
+  const [subcategory, setSubcategory] = useState(initial?.subcategory ?? '');
   const [size, setSize] = useState(initial?.size ?? '');
   const [brand, setBrand] = useState(initial?.brand ?? '');
   const [color, setColor] = useState(initial?.color ?? '');
@@ -41,6 +42,16 @@ export function SellForm({ initial }: Props) {
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const activeCat = CATEGORIES.find((c) => c.slug === category);
+
+  function onCategoryChange(slug: string) {
+    setCategory(slug);
+    // Reset the audience when switching to a category without sub-departments.
+    const cat = CATEGORIES.find((c) => c.slug === slug);
+    if (!cat?.subcategories) setSubcategory('');
+    else if (!cat.subcategories.some((s) => s.slug === subcategory)) setSubcategory('');
+  }
 
   function addFiles(files: FileList | null) {
     if (!files) return;
@@ -113,6 +124,7 @@ export function SellForm({ initial }: Props) {
         original_price: originalPrice ? Number(originalPrice) : null,
         currency: CURRENCY,
         category,
+        subcategory: activeCat?.subcategories ? subcategory || null : null,
         size: size.trim() || null,
         brand: brand.trim() || null,
         color: color.trim() || null,
@@ -211,7 +223,7 @@ export function SellForm({ initial }: Props) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label" htmlFor="category">Category</label>
-            <select id="category" className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <select id="category" className="input" value={category} onChange={(e) => onCategoryChange(e.target.value)}>
               {CATEGORIES.map((c) => (
                 <option key={c.slug} value={c.slug}>{c.emoji} {c.label}</option>
               ))}
@@ -226,6 +238,23 @@ export function SellForm({ initial }: Props) {
             </select>
           </div>
         </div>
+
+        {activeCat?.subcategories && (
+          <div>
+            <label className="label" htmlFor="audience">Who’s it for?</label>
+            <select
+              id="audience"
+              className="input"
+              value={subcategory}
+              onChange={(e) => setSubcategory(e.target.value)}
+            >
+              <option value="">Select…</option>
+              {activeCat.subcategories.map((s) => (
+                <option key={s.slug} value={s.slug}>{s.emoji} {s.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <div>

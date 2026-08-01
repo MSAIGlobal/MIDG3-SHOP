@@ -43,7 +43,7 @@ export default function FavouritesPage() {
       const { data } = await supabase
         .from('listings')
         .select(
-          'id,title,description,price,original_price,currency,category,size,brand,color,condition,status,created_at,seller_id,listing_images(url,position)'
+          'id,title,description,price,original_price,currency,category,subcategory,size,brand,color,condition,status,created_at,seller_id,listing_images(url,position)'
         )
         .in('id', ids);
 
