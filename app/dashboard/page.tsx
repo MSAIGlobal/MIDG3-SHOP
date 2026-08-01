@@ -47,13 +47,22 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      <Link
-        href="/dashboard/feedback"
-        className="card flex items-center justify-between p-4 hover:bg-midg-50"
-      >
-        <span className="text-sm font-semibold text-plum">💬 Buyer feedback</span>
-        <span className="text-sm text-midg-600">Manage quotes →</span>
-      </Link>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Link
+          href="/dashboard/feedback"
+          className="card flex items-center justify-between p-4 hover:bg-midg-50"
+        >
+          <span className="text-sm font-semibold text-plum">💬 Buyer feedback</span>
+          <span className="text-sm text-midg-600">Manage →</span>
+        </Link>
+        <Link
+          href="/dashboard/statements"
+          className="card flex items-center justify-between p-4 hover:bg-midg-50"
+        >
+          <span className="text-sm font-semibold text-plum">🧾 HMRC statements</span>
+          <span className="text-sm text-midg-600">View →</span>
+        </Link>
+      </div>
 
       <div className="grid grid-cols-3 gap-3">
         {stats.map((s) => (

@@ -1,4 +1,4 @@
-import type { Listing, Testimonial } from './types';
+import type { Listing, Testimonial, Order } from './types';
 
 // Demo stock shown before the Supabase backend is connected, so the shop looks
 // alive from the very first deploy. Once real listings exist they take over.
@@ -232,4 +232,48 @@ export const SAMPLE_TESTIMONIALS: Testimonial[] = [
   { id: 't4', quote: 'Bought a bag for my mum and she adores it. Fab communication and speedy delivery.', author: 'Danielle R.', rating: 5, created_at: hoursAgo(120) },
   { id: 't5', quote: 'My go-to for pre-loved treasures now. Everything arrives clean, fresh and beautifully packaged.', author: 'Aisha B.', rating: 5, created_at: hoursAgo(150) },
   { id: 't6', quote: 'Five stars! Kids’ raincoat was spotless and such good value. Highly recommend this shop.', author: 'Laura P.', rating: 5, created_at: hoursAgo(180) },
+];
+
+const daysAgo = (d: number) => new Date(Date.now() - 1000 * 60 * 60 * 24 * d).toISOString();
+
+// Sample orders so the HMRC statements format can be previewed before the
+// backend is connected. Spread across recent weeks/months. Replaced by real
+// orders once customers check out.
+export const SAMPLE_ORDERS: Order[] = [
+  {
+    id: 'o1', ref: 'MIDG3-SAMPLE-1042', buyer_name: 'Sarah Malik', buyer_email: 'sarah@example.com',
+    item_total: 42, postage: 3.99, total: 45.99, currency: 'GBP', status: 'paid', created_at: daysAgo(3),
+    items: [{ id: 'oi1', listing_id: null, title: 'Vintage 90s Levi’s Denim Jacket', price: 42 }],
+  },
+  {
+    id: 'o2', ref: 'MIDG3-SAMPLE-1041', buyer_name: 'Priya Kaur', buyer_email: 'priya@example.com',
+    item_total: 27, postage: 3.99, total: 30.99, currency: 'GBP', status: 'paid', created_at: daysAgo(6),
+    items: [
+      { id: 'oi2', listing_id: null, title: 'Blush Silk Scarf', price: 12 },
+      { id: 'oi3', listing_id: null, title: 'Vitamin C Brightening Serum', price: 14 },
+    ],
+  },
+  {
+    id: 'o3', ref: 'MIDG3-SAMPLE-1040', buyer_name: 'Emma Thompson', buyer_email: 'emma@example.com',
+    item_total: 16, postage: 3.99, total: 19.99, currency: 'GBP', status: 'paid', created_at: daysAgo(12),
+    items: [{ id: 'oi4', listing_id: null, title: 'Argan Oil Hair Treatment Set', price: 16 }],
+  },
+  {
+    id: 'o4', ref: 'MIDG3-SAMPLE-1039', buyer_name: 'Danielle Roberts', buyer_email: 'dani@example.com',
+    item_total: 35, postage: 3.99, total: 38.99, currency: 'GBP', status: 'paid', created_at: daysAgo(20),
+    items: [{ id: 'oi5', listing_id: null, title: 'Classic Leather Crossbody Bag', price: 35 }],
+  },
+  {
+    id: 'o5', ref: 'MIDG3-SAMPLE-1038', buyer_name: 'Aisha Begum', buyer_email: 'aisha@example.com',
+    item_total: 24, postage: 3.99, total: 27.99, currency: 'GBP', status: 'paid', created_at: daysAgo(38),
+    items: [{ id: 'oi6', listing_id: null, title: 'Floral Tea Dress — Summer Ready', price: 24 }],
+  },
+  {
+    id: 'o6', ref: 'MIDG3-SAMPLE-1037', buyer_name: 'Laura Price', buyer_email: 'laura@example.com',
+    item_total: 21, postage: 3.99, total: 24.99, currency: 'GBP', status: 'paid', created_at: daysAgo(45),
+    items: [
+      { id: 'oi7', listing_id: null, title: 'Kids’ Rainbow Raincoat (Age 4-5)', price: 11 },
+      { id: 'oi8', listing_id: null, title: 'Rose Tinted Lip Gloss Trio', price: 10 },
+    ],
+  },
 ];

@@ -1,0 +1,137 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useCart } from '@/lib/cart';
+import { placeOrder, type CheckoutResult } from '@/lib/checkout';
+import { formatPrice } from '@/lib/format';
+import { POSTAGE } from '@/lib/constants';
+import { CardIcon, CheckIcon } from '@/components/icons';
+
+export default function BasketPage() {
+  const { items, subtotal, remove, clear, ready } = useCart();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [placed, setPlaced] = useState<CheckoutResult | null>(null);
+
+  const postage = items.length ? POSTAGE : 0;
+  const total = subtotal + postage;
+
+  async function checkout() {
+    if (!items.length || busy) return;
+    setBusy(true);
+    const result = await placeOrder(items, { name, email });
+    setPlaced(result);
+    clear();
+    setBusy(false);
+    // Open Revolut straight away when available.
+    if (result.payLink) window.open(result.payLink, '_blank', 'noopener');
+  }
+
+  // ── Order confirmation ──────────────────────────────────────────────────
+  if (placed) {
+    return (
+      <div className="mx-auto max-w-md space-y-5 py-6 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <CheckIcon width={32} height={32} />
+        </div>
+        <div>
+          <h1 className="font-display text-2xl font-extrabold text-plum">Order placed! 💕</h1>
+          <p className="mt-1 text-sm text-plum/60">
+            Your reference is <span className="font-semibold text-plum">{placed.ref}</span>
+          </p>
+        </div>
+
+        <div className="card p-5 text-left text-sm">
+          <div className="flex justify-between"><span className="text-plum/60">Items</span><span>{formatPrice(placed.itemTotal)}</span></div>
+          <div className="mt-1 flex justify-between"><span className="text-plum/60">Postage</span><span>{formatPrice(placed.postage)}</span></div>
+          <div className="mt-2 flex justify-between border-t border-midg-50 pt-2 text-base font-extrabold text-plum">
+            <span>Total</span><span className="text-midg-600">{formatPrice(placed.total)}</span>
+          </div>
+        </div>
+
+        {placed.payLink ? (
+          <>
+            <a href={placed.payLink} target="_blank" rel="noreferrer" className="btn bg-[#0666eb] text-white shadow-soft hover:bg-[#0552c2] w-full">
+              <CardIcon width={20} height={20} /> Pay {formatPrice(placed.total)} with Revolut
+            </a>
+            <p className="text-xs text-plum/50">
+              Didn’t open? Tap the button above to pay securely via Revolut. Please quote{' '}
+              <span className="font-semibold">{placed.ref}</span> as the payment reference so Midge can match it up.
+            </p>
+          </>
+        ) : (
+          <p className="rounded-2xl bg-midg-50 p-4 text-sm text-plum/70">
+            Thank you! Midge will be in touch to arrange payment and postage. Please keep your
+            reference <span className="font-semibold">{placed.ref}</span>.
+          </p>
+        )}
+
+        <Link href="/shop" className="btn-ghost">Continue shopping</Link>
+      </div>
+    );
+  }
+
+  // ── Empty basket ────────────────────────────────────────────────────────
+  if (ready && items.length === 0) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <p className="text-5xl">🛍️</p>
+        <h1 className="mt-4 font-display text-2xl font-extrabold text-plum">Your basket is empty</h1>
+        <p className="mt-2 text-sm text-plum/60">Add some treasures and they’ll appear here.</p>
+        <Link href="/shop" className="btn-primary mt-6">Start shopping</Link>
+      </div>
+    );
+  }
+
+  // ── Basket ──────────────────────────────────────────────────────────────
+  return (
+    <div className="mx-auto max-w-2xl space-y-6 py-2">
+      <h1 className="font-display text-2xl font-extrabold text-plum">Your basket</h1>
+
+      <div className="card divide-y divide-midg-50">
+        {items.map((i) => (
+          <div key={i.listingId} className="flex items-center gap-3 p-3">
+            <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-xl bg-midg-50">
+              <Image src={i.image} alt="" fill sizes="56px" className="object-cover" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <Link href={`/item/${i.listingId}`} className="truncate text-sm font-semibold text-plum hover:text-midg-600">
+                {i.title}
+              </Link>
+              <p className="text-sm font-bold text-midg-600">{formatPrice(i.price)}</p>
+            </div>
+            <button onClick={() => remove(i.listingId)} className="text-xs text-plum/40 hover:text-red-500">
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Optional buyer details for Midge's records */}
+      <div className="card space-y-3 p-5">
+        <h2 className="text-sm font-bold text-plum">Your details <span className="font-normal text-plum/40">· optional, helps Midge post your order</span></h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input className="input" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+          <input className="input" type="email" placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+      </div>
+
+      {/* Totals */}
+      <div className="card space-y-2 p-5 text-sm">
+        <div className="flex justify-between"><span className="text-plum/60">Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+        <div className="flex justify-between"><span className="text-plum/60">UK postage</span><span>{formatPrice(postage)}</span></div>
+        <div className="flex justify-between border-t border-midg-50 pt-2 text-lg font-extrabold text-plum">
+          <span>Total</span><span className="text-midg-600">{formatPrice(total)}</span>
+        </div>
+      </div>
+
+      <button onClick={checkout} disabled={busy} className="btn bg-[#0666eb] text-white shadow-soft hover:bg-[#0552c2] w-full">
+        <CardIcon width={20} height={20} /> {busy ? 'Placing order…' : `Checkout · pay ${formatPrice(total)}`}
+      </button>
+      <p className="text-center text-xs text-plum/45">Secure payment to Midge via Revolut.</p>
+    </div>
+  );
+}

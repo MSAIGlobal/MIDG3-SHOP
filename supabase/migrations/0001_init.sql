@@ -88,6 +88,32 @@ create table if not exists public.inquiries (
   created_at  timestamptz not null default now()
 );
 
+-- ── Orders (basket / Buy Now purchases) ──────────────────────────────────────
+create table if not exists public.orders (
+  id           uuid primary key default gen_random_uuid(),
+  ref          text not null,
+  buyer_name   text,
+  buyer_email  text,
+  item_total   numeric(10,2) not null default 0,
+  postage      numeric(10,2) not null default 0,
+  total        numeric(10,2) not null default 0,
+  currency     text not null default 'GBP',
+  status       text not null default 'placed'
+                 check (status in ('placed','paid','cancelled','refunded')),
+  created_at   timestamptz not null default now()
+);
+create index if not exists orders_created_idx on public.orders (created_at desc);
+
+create table if not exists public.order_items (
+  id          uuid primary key default gen_random_uuid(),
+  order_id    uuid not null references public.orders(id) on delete cascade,
+  listing_id  uuid references public.listings(id) on delete set null,
+  title       text not null,
+  price       numeric(10,2) not null default 0,
+  created_at  timestamptz not null default now()
+);
+create index if not exists order_items_order_idx on public.order_items (order_id);
+
 -- ── Testimonials (buyer feedback quotes) ─────────────────────────────────────
 create table if not exists public.testimonials (
   id          uuid primary key default gen_random_uuid(),
@@ -161,6 +187,8 @@ alter table public.favourites     enable row level security;
 alter table public.followers      enable row level security;
 alter table public.inquiries      enable row level security;
 alter table public.testimonials   enable row level security;
+alter table public.orders         enable row level security;
+alter table public.order_items    enable row level security;
 
 -- Profiles: a user sees & edits only their own row.
 create policy "profiles self read"   on public.profiles for select using (auth.uid() = id);
@@ -194,6 +222,14 @@ create policy "inquiries owner read"    on public.inquiries for select using (pu
 create policy "testimonials public read" on public.testimonials for select using (true);
 create policy "testimonials owner write" on public.testimonials for all
   using (public.is_admin()) with check (public.is_admin());
+
+-- Orders: anyone can place an order (checkout); only the owner reads them
+-- (they hold personal + financial data for HMRC record-keeping).
+create policy "orders public insert"     on public.orders for insert with check (true);
+create policy "orders owner read"         on public.orders for select using (public.is_admin());
+create policy "orders owner update"       on public.orders for update using (public.is_admin());
+create policy "order_items public insert" on public.order_items for insert with check (true);
+create policy "order_items owner read"    on public.order_items for select using (public.is_admin());
 
 -- ════════════════════════════════════════════════════════════════════════════
 -- Storage — product photos
