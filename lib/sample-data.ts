@@ -199,14 +199,13 @@ export const SAMPLE_LISTINGS: Listing[] = [
     created_at: hoursAgo(135),
   },
 
-  // ── Pre-Loved Clothing · Elders ─────────────────────────────────────────
   {
     id: 'sample-17',
     title: 'Soft Lambswool Cardigan',
     description:
-      'Wonderfully soft lambswool cardigan with easy-to-do buttons — gentle on the hands. Warm, lightweight and cosy. A little pilling but plenty of love left.',
+      'Wonderfully soft lambswool cardigan with easy-to-do buttons. Warm, lightweight and cosy. A little pilling but plenty of love left.',
     price: 26, original_price: 40, currency: 'GBP',
-    category: 'clothing', subcategory: 'elders',
+    category: 'clothing', subcategory: 'adults',
     size: 'L', brand: null, color: 'Camel', condition: 'Good', status: 'active',
     images: [img('photo-1594035910387-fea47794261f')],
     created_at: hoursAgo(150),

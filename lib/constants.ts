@@ -37,7 +37,6 @@ export const CATEGORIES: CategoryDef[] = [
     subcategories: [
       { slug: 'adults', label: 'Adults', emoji: '👗' },
       { slug: 'kids', label: 'Kids', emoji: '🧸' },
-      { slug: 'elders', label: 'Elders', emoji: '🧣' },
     ],
   },
 ];
