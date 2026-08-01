@@ -8,7 +8,9 @@ export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@midg3.shop';
 export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP || '';
 
-export const OWNER_EMAIL = process.env.NEXT_PUBLIC_OWNER_EMAIL || '';
+// Server-only (no NEXT_PUBLIC_ prefix) so the owner's personal email is never
+// shipped in the public browser bundle. Only read in server code (lib/auth).
+export const OWNER_EMAIL = process.env.OWNER_EMAIL || '';
 
 export interface SubCategory {
   slug: string;

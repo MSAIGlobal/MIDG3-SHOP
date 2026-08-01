@@ -45,7 +45,7 @@ Copy `.env.example` → `.env.local` (local) and add the same in Netlify
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
-| `NEXT_PUBLIC_OWNER_EMAIL` | Owner's email (auto-admin) |
+| `OWNER_EMAIL` | Owner's email (auto-admin) — server-only |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | Where "Message to buy" emails go |
 | `NEXT_PUBLIC_WHATSAPP` | WhatsApp number for quick-buy (digits only, e.g. `447…`) |
 
@@ -57,7 +57,7 @@ Copy `.env.example` → `.env.local` (local) and add the same in Netlify
 
 ### 4. First run
 
-- The owner signs up at `/signup` using `NEXT_PUBLIC_OWNER_EMAIL`.
+- The owner signs up at `/signup` using `OWNER_EMAIL`.
 - She's automatically the shop owner and can add items at `/sell` and manage
   them at `/dashboard`.
 
