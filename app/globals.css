@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Pacifico&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-body: 'Poppins';
+  --font-display: 'Poppins';
+  --font-script: 'Pacifico';
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-blush text-plum antialiased;
+    /* Soft pink wash so the whole shop feels warm on mobile. */
+    background-image:
+      radial-gradient(60rem 60rem at 100% -10%, rgba(255, 158, 205, 0.18), transparent 60%),
+      radial-gradient(50rem 50rem at -10% 10%, rgba(255, 95, 172, 0.12), transparent 55%);
+    background-attachment: fixed;
+  }
+  /* Bigger, thumb-friendly tap targets on mobile by default. */
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn bg-midg-500 text-white shadow-soft hover:bg-midg-600;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-midg-600 ring-1 ring-midg-200 hover:bg-midg-50;
+  }
+  .btn-ghost {
+    @apply btn text-midg-600 hover:bg-midg-50;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition;
+  }
+  .card {
+    @apply rounded-3xl bg-white shadow-card;
+  }
+  .input {
+    @apply w-full rounded-2xl border border-midg-100 bg-white px-4 py-3 text-sm text-plum placeholder:text-midg-300 outline-none transition focus:border-midg-400 focus:ring-4 focus:ring-midg-100;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-plum/80;
+  }
+  /* Horizontal scroll rows (category chips, image carousels) without a scrollbar. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
