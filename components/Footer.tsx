@@ -16,6 +16,7 @@ export function Footer() {
             <Link href="/about" className="text-plum/70 hover:text-midg-600">Our story</Link>
             <Link href="/favourites" className="text-plum/70 hover:text-midg-600">Saved items</Link>
             <Link href="/login" className="text-plum/70 hover:text-midg-600">Sign in</Link>
+            <Link href="/midge" className="text-plum/70 hover:text-midg-600">Midge’s login</Link>
           </nav>
         </div>
         <p className="mt-8 text-xs text-plum/40">
