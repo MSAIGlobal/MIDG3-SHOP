@@ -28,6 +28,34 @@ export interface Listing {
   seller_id?: string | null;
 }
 
+export interface CartItem {
+  listingId: string;
+  title: string;
+  price: number;
+  image: string;
+}
+
+export interface OrderItem {
+  id: string;
+  listing_id: string | null;
+  title: string;
+  price: number;
+}
+
+export interface Order {
+  id: string;
+  ref: string;
+  buyer_name: string | null;
+  buyer_email: string | null;
+  item_total: number;
+  postage: number;
+  total: number;
+  currency: string;
+  status: 'placed' | 'paid' | 'cancelled' | 'refunded';
+  created_at: string;
+  items: OrderItem[];
+}
+
 export interface Testimonial {
   id: string;
   quote: string;

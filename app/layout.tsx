@@ -3,6 +3,7 @@ import './globals.css';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Footer } from '@/components/Footer';
+import { CartProvider } from '@/lib/cart';
 import { getSessionUser } from '@/lib/auth';
 import { SHOP_NAME, SHOP_TAGLINE } from '@/lib/constants';
 
@@ -38,11 +39,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en-GB">
       <body className="min-h-screen">
-        <Header isOwner={isOwner} signedIn={signedIn} />
-        {/* Bottom padding leaves room for the mobile tab bar. */}
-        <main className="mx-auto min-h-[70vh] max-w-6xl px-4 pb-28 pt-4 md:pb-10">{children}</main>
-        <Footer />
-        <BottomNav isOwner={isOwner} signedIn={signedIn} />
+        <CartProvider>
+          <Header isOwner={isOwner} signedIn={signedIn} />
+          {/* Bottom padding leaves room for the mobile tab bar. */}
+          <main className="mx-auto min-h-[70vh] max-w-6xl px-4 pb-28 pt-4 md:pb-10">{children}</main>
+          <Footer />
+          <BottomNav isOwner={isOwner} signedIn={signedIn} />
+        </CartProvider>
       </body>
     </html>
   );

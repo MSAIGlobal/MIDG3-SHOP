@@ -4,6 +4,7 @@ import type { Listing } from '@/lib/types';
 import { formatPrice, discountPercent } from '@/lib/format';
 import { ConditionBadge, StatusBadge } from './Badges';
 import { FavouriteButton } from './FavouriteButton';
+import { QuickAddToCart } from './CartButtons';
 
 // Product card: big photo, clear price, condition trust-badge, one-tap save,
 // and a reduction flag — the elements that convert browsers into buyers.
@@ -39,9 +40,10 @@ export function ProductCard({ listing, priority = false }: { listing: Listing; p
             <StatusBadge status={listing.status} />
           </div>
 
-          {/* Save button */}
-          <div className="absolute right-2.5 top-2.5">
+          {/* Save + quick add-to-basket */}
+          <div className="absolute right-2.5 top-2.5 flex flex-col gap-1.5">
             <FavouriteButton listingId={listing.id} />
+            {!isSold && <QuickAddToCart listing={listing} />}
           </div>
         </div>
       </div>

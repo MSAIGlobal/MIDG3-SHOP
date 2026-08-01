@@ -1,75 +1,56 @@
 'use client';
 
 import { CONTACT_EMAIL, POSTAGE, WHATSAPP_NUMBER } from '@/lib/constants';
-import { revolutPayLink } from '@/lib/payments';
 import { formatPrice } from '@/lib/format';
+import { useCart } from '@/lib/cart';
 import type { Listing } from '@/lib/types';
 import { FavouriteButton } from './FavouriteButton';
-import { WhatsAppIcon, BagIcon, CardIcon } from './icons';
+import { AddToCartButton, BuyNowButton } from './CartButtons';
+import { BagIcon, CheckIcon } from './icons';
 
-// Purchase actions. "Buy now" sends the shopper straight to Midge's Revolut with
-// the amount pre-filled; "Message to buy" (WhatsApp/email) is the fallback and a
-// way to ask questions first. A persistent, thumb-reachable CTA on mobile is one
-// of the biggest conversion wins, so it never scrolls away.
+// Purchase actions. Lead with one-click "Buy now" (records the order + opens
+// Revolut) and "Add to basket". "Ask a question" (WhatsApp/email) stays as a
+// quiet fallback. A persistent, thumb-reachable CTA on mobile is one of the
+// biggest conversion wins, so it never scrolls away.
 export function BuyBar({ listing }: { listing: Listing }) {
+  const { has, add, remove } = useCart();
   const sold = listing.status === 'sold';
   const total = listing.price + POSTAGE;
-  // Buy now charges item price + postage via Revolut.
-  const payLink = revolutPayLink(total, listing.currency);
+  const inCart = has(listing.id);
+  const cartItem = { listingId: listing.id, title: listing.title, price: listing.price, image: listing.images[0] };
 
   const msg = `Hi! I'd love to buy the "${listing.title}" (${formatPrice(listing.price)} + ${formatPrice(POSTAGE)} postage = ${formatPrice(total)}) from MIDG3. Is it still available? 💕`;
   const waHref = WHATSAPP_NUMBER
     ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
     : null;
   const mailHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-    `MIDG3 order: ${listing.title}`
+    `MIDG3 enquiry: ${listing.title}`
   )}&body=${encodeURIComponent(msg)}`;
   const messageHref = waHref ?? mailHref;
-
-  const BuyNow = ({ className = '' }: { className?: string }) => (
-    <a
-      href={payLink!}
-      target="_blank"
-      rel="noreferrer"
-      className={`btn bg-[#0666eb] text-white shadow-soft hover:bg-[#0552c2] ${className}`}
-    >
-      <CardIcon width={20} height={20} /> Buy now
-    </a>
-  );
-
-  const MessageBtn = ({ className = '' }: { className?: string }) => (
-    <a
-      href={messageHref}
-      target={waHref ? '_blank' : undefined}
-      rel="noreferrer"
-      className={payLink ? `btn-secondary ${className}` : `btn-primary ${className}`}
-    >
-      {waHref ? <WhatsAppIcon width={20} height={20} /> : <BagIcon width={20} height={20} />}
-      {payLink ? 'Ask a question' : 'Message to buy'}
-    </a>
-  );
 
   return (
     <>
       {/* Inline (desktop / in-flow) */}
-      <div className="hidden gap-3 md:flex">
+      <div className="hidden flex-col gap-3 md:flex">
         {sold ? (
-          <span className="btn flex-1 cursor-default bg-plum/10 text-plum/60">This item has sold</span>
+          <span className="btn cursor-default bg-plum/10 text-plum/60">This item has sold</span>
         ) : (
           <>
-            {payLink && <BuyNow className="flex-1" />}
-            <MessageBtn className={payLink ? '' : 'flex-1'} />
+            <div className="flex gap-3">
+              <BuyNowButton listing={listing} className="flex-1" />
+              <FavouriteButton listingId={listing.id} withLabel />
+            </div>
+            <AddToCartButton listing={listing} className="w-full" />
+            <p className="text-xs text-plum/45">
+              {formatPrice(listing.price)} + {formatPrice(POSTAGE)} postage ={' '}
+              <span className="font-semibold text-plum/70">{formatPrice(total)}</span> ·{' '}
+              <a href={messageHref} target={waHref ? '_blank' : undefined} rel="noreferrer" className="underline hover:text-midg-600">
+                Ask a question first
+              </a>
+            </p>
           </>
         )}
-        <FavouriteButton listingId={listing.id} withLabel />
       </div>
-      {!sold && (
-        <p className="hidden text-xs text-plum/45 md:block">
-          {formatPrice(listing.price)} + {formatPrice(POSTAGE)} postage ={' '}
-          <span className="font-semibold text-plum/70">{formatPrice(total)}</span> total
-          {payLink && '. Secure payment to Midge via Revolut.'}
-        </p>
-      )}
 
       {/* Sticky mobile bar */}
       <div
@@ -83,21 +64,21 @@ export function BuyBar({ listing }: { listing: Listing }) {
           </div>
           {sold ? (
             <span className="btn flex-1 cursor-default bg-plum/10 text-plum/60">Sold</span>
-          ) : payLink ? (
-            <>
-              <BuyNow className="flex-1" />
-              <a
-                href={messageHref}
-                target={waHref ? '_blank' : undefined}
-                rel="noreferrer"
-                aria-label="Ask a question"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-midg-600 ring-1 ring-midg-200"
-              >
-                {waHref ? <WhatsAppIcon width={20} height={20} /> : <BagIcon width={20} height={20} />}
-              </a>
-            </>
           ) : (
-            <MessageBtn className="flex-1" />
+            <>
+              <BuyNowButton listing={listing} className="flex-1" />
+              <button
+                type="button"
+                onClick={() => (inCart ? remove(listing.id) : add(cartItem))}
+                aria-label={inCart ? 'In basket' : 'Add to basket'}
+                aria-pressed={inCart}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ring-1 ${
+                  inCart ? 'bg-midg-100 text-midg-700 ring-midg-200' : 'bg-white text-midg-600 ring-midg-200'
+                }`}
+              >
+                {inCart ? <CheckIcon width={20} height={20} /> : <BagIcon width={20} height={20} />}
+              </button>
+            </>
           )}
           <FavouriteButton listingId={listing.id} />
         </div>

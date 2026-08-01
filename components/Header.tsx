@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from './Logo';
+import { CartButton } from './CartButton';
 import { SearchIcon, HeartIcon, UserIcon, PlusIcon } from './icons';
 
 interface Props {
@@ -38,6 +39,8 @@ export function Header({ isOwner, signedIn }: Props) {
               <PlusIcon width={18} height={18} /> Add item
             </Link>
           )}
+          {/* Basket is visible on every screen size. */}
+          <CartButton />
           <Link
             href="/favourites"
             className="hidden rounded-full p-2.5 text-plum/70 transition hover:bg-midg-50 hover:text-midg-600 md:inline-flex"
