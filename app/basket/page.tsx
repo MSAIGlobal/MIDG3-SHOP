@@ -61,7 +61,16 @@ export default function BasketPage() {
               <CardIcon width={20} height={20} /> Pay {formatPrice(placed.total)} with {methodLabel}
             </a>
             <p className="text-xs text-plum/50">
-              Please quote <span className="font-semibold">{placed.ref}</span> as the payment reference so Midge can match it up.
+              {placed.paymentMethod === 'revolut' ? (
+                <>
+                  Enter <span className="font-semibold">{formatPrice(placed.total)}</span> and add reference{' '}
+                  <span className="font-semibold">{placed.ref}</span> so Midge can match your order.
+                </>
+              ) : (
+                <>
+                  Please quote <span className="font-semibold">{placed.ref}</span> as the payment reference so Midge can match it up.
+                </>
+              )}
             </p>
           </>
         ) : (
