@@ -87,10 +87,8 @@ export async function getListings(query: ListingQuery = {}): Promise<Listing[]> 
   else q = q.order('created_at', { ascending: false });
 
   const { data, error } = await q;
-  if (error || !data) {
-    // Fail soft — never show an empty broken shop.
-    return filterAndSortSample(SAMPLE_LISTINGS, query);
-  }
+  // Backend is connected — show real data only (never fabricated sample stock).
+  if (error || !data) return [];
   return (data as unknown as ListingRow[]).map(rowToListing);
 }
 
@@ -162,7 +160,8 @@ export async function getTestimonials(): Promise<Testimonial[]> {
     .select('id,quote,author,rating,created_at')
     .order('created_at', { ascending: false });
 
-  if (error || !data || data.length === 0) return SAMPLE_TESTIMONIALS;
+  // Real reviews only once connected — no fabricated testimonials on a live shop.
+  if (error || !data) return [];
   return data as Testimonial[];
 }
 
