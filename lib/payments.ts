@@ -17,11 +17,17 @@ export function hasRevolut(): boolean {
   return REVOLUT_USERNAME.length > 0;
 }
 
-/** Build a pre-filled Revolut payment link for an amount + currency. */
-export function revolutPayLink(amount: number, currency = 'GBP'): string | null {
+/** Revolut payment link (the buyer's plain profile link).
+ *
+ * NOTE: the amount-in-path format (revolut.me/user/10gbp) is NOT reliably
+ * openable by the Revolut app ("We couldn't open that link"), so we use the
+ * plain profile link and show the exact amount + reference for the buyer to
+ * enter. `amount`/`currency` are accepted for a consistent signature but not
+ * embedded in the URL.
+ */
+export function revolutPayLink(_amount?: number, _currency = 'GBP'): string | null {
   if (!REVOLUT_USERNAME) return null;
-  const amt = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
-  return `https://revolut.me/${REVOLUT_USERNAME}/${amt}${currency.toLowerCase()}`;
+  return `https://revolut.me/${REVOLUT_USERNAME}`;
 }
 
 // PayPal.me link (paypal.me/<username>/<amount><CURRENCY>).
