@@ -4,7 +4,9 @@ import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { Footer } from '@/components/Footer';
 import { CartProvider } from '@/lib/cart';
+import { ConfigProvider } from '@/components/ConfigProvider';
 import { getSessionUser } from '@/lib/auth';
+import { getShopConfig } from '@/lib/shop-config';
 import { SHOP_NAME, SHOP_TAGLINE } from '@/lib/constants';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://midg3-shop.netlify.app';
@@ -35,13 +37,14 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const user = await getSessionUser();
+  const [user, shopConfig] = await Promise.all([getSessionUser(), getShopConfig()]);
   const isOwner = Boolean(user?.isOwner);
   const signedIn = Boolean(user);
 
   return (
     <html lang="en-GB">
       <body className="min-h-screen">
+        <ConfigProvider value={shopConfig}>
         <CartProvider>
           <Header isOwner={isOwner} signedIn={signedIn} />
           {/* Bottom padding leaves room for the mobile tab bar. */}
@@ -49,6 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Footer />
           <BottomNav isOwner={isOwner} signedIn={signedIn} />
         </CartProvider>
+        </ConfigProvider>
       </body>
     </html>
   );
