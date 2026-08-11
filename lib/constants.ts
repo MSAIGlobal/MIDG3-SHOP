@@ -1,7 +1,7 @@
 import type { Condition } from './types';
 
 export const SHOP_NAME = 'MIDG3';
-export const SHOP_TAGLINE = 'Pre-loved treasures, hand-picked with love';
+export const SHOP_TAGLINE = 'Pre-loved treasures — homeware, beauty & fashion';
 
 // Where "Message to buy" enquiries go, and the WhatsApp quick-buy number.
 export const CONTACT_EMAIL =
@@ -75,15 +75,13 @@ export const STORAGE_BUCKET = 'listing-images';
 // Payment methods the buyer chooses between at checkout. Revolut/PayPal produce
 // a pre-filled pay link when configured; the others give clear instructions.
 export const PAYMENT_METHODS: {
-  id: 'revolut' | 'paypal' | 'bank' | 'collection';
+  id: 'paypal' | 'bank';
   label: string;
   emoji: string;
   desc: string;
 }[] = [
-  { id: 'revolut', label: 'Revolut', emoji: '💳', desc: 'Pay by card or Revolut balance' },
-  { id: 'paypal', label: 'PayPal', emoji: '🅿️', desc: 'PayPal account or card' },
+  { id: 'paypal', label: 'PayPal', emoji: '🅿️', desc: 'Pay by card or PayPal — quick & secure' },
   { id: 'bank', label: 'Bank transfer', emoji: '🏦', desc: 'Midge sends you her details' },
-  { id: 'collection', label: 'Pay on collection', emoji: '🤝', desc: 'Cash when you collect (local)' },
 ];
 
 export type PaymentMethodId = (typeof PAYMENT_METHODS)[number]['id'];

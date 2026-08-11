@@ -27,13 +27,13 @@ export default async function HomePage() {
             <SparkleIcon width={14} height={14} /> New arrivals every week
           </span>
           <h1 className="mt-4 font-display text-3xl font-extrabold leading-tight sm:text-5xl">
-            Pre-loved treasures,
+            Pre-loved treasures
             <br />
-            <span className="font-script font-normal">hand-picked with love</span>
+            <span className="font-script font-normal">homeware, beauty &amp; fashion</span>
           </h1>
           <p className="mt-3 max-w-md text-sm text-white/90 sm:text-base">
-            {SHOP_TAGLINE}. Unique fashion, bags &amp; homeware — described honestly and
-            posted with care. Find your next favourite thing. 💕
+            Hand-picked homeware, beauty &amp; fashion — described honestly and posted
+            with care. Find your next favourite thing. 💕
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/shop" className="btn bg-white text-midg-600 hover:bg-midg-50">
