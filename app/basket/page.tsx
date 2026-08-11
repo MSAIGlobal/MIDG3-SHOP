@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart';
+import { useShopConfig } from '@/components/ConfigProvider';
 import { placeOrder, type CheckoutResult } from '@/lib/checkout';
 import { formatPrice } from '@/lib/format';
 import { POSTAGE, PAYMENT_METHODS, paymentMethodLabel, type PaymentMethodId } from '@/lib/constants';
@@ -11,6 +12,7 @@ import { CardIcon, CheckIcon } from '@/components/icons';
 
 export default function BasketPage() {
   const { items, subtotal, remove, clear, ready } = useCart();
+  const shopConfig = useShopConfig();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [method, setMethod] = useState<PaymentMethodId | ''>('');
@@ -23,7 +25,7 @@ export default function BasketPage() {
   async function checkout() {
     if (!items.length || !method || busy) return;
     setBusy(true);
-    const result = await placeOrder(items, { name, email, paymentMethod: method });
+    const result = await placeOrder(items, { name, email, paymentMethod: method }, shopConfig);
     setPlaced(result);
     clear();
     setBusy(false);

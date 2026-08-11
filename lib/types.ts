@@ -28,6 +28,13 @@ export interface Listing {
   seller_id?: string | null;
 }
 
+export interface PublicShopConfig {
+  revolutUsername: string;
+  paypalUsername: string;
+  contactEmail: string;
+  whatsapp: string;
+}
+
 export interface CartItem {
   listingId: string;
   title: string;

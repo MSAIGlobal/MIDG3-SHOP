@@ -1,55 +1,39 @@
-// Revolut payment links.
-//
-// Midge collects payment via her personal Revolut link (revolut.me/<username>).
-// Revolut supports pre-filling an amount and currency in the URL, e.g.
-//   https://revolut.me/midge/24gbp
-// which opens Revolut (app or web) with the amount ready to send — perfect for a
-// small reseller with no merchant account needed.
+// Payment links. Handles are supplied by the caller (from the DB-backed shop
+// config) rather than read from env here, so they can be changed without a
+// rebuild.
 
-export const REVOLUT_USERNAME = (process.env.NEXT_PUBLIC_REVOLUT_USERNAME || '')
-  // Accept a bare username, an @handle, or a full revolut.me link.
-  .replace(/^@/, '')
-  .replace(/^https?:\/\/(www\.)?revolut\.me\//i, '')
-  .replace(/\/.*$/, '')
-  .trim();
-
-export function hasRevolut(): boolean {
-  return REVOLUT_USERNAME.length > 0;
+function normalise(username: string, host: string): string {
+  return (username || '')
+    .replace(/^@/, '')
+    .replace(new RegExp(`^https?://(www\\.)?${host}/`, 'i'), '')
+    .replace(/\/.*$/, '')
+    .trim();
 }
 
-/** Revolut payment link (the buyer's plain profile link).
- *
- * NOTE: the amount-in-path format (revolut.me/user/10gbp) is NOT reliably
- * openable by the Revolut app ("We couldn't open that link"), so we use the
- * plain profile link and show the exact amount + reference for the buyer to
- * enter. `amount`/`currency` are accepted for a consistent signature but not
- * embedded in the URL.
- */
-export function revolutPayLink(_amount?: number, _currency = 'GBP'): string | null {
-  if (!REVOLUT_USERNAME) return null;
-  return `https://revolut.me/${REVOLUT_USERNAME}`;
+// Revolut personal link — the plain profile link (opens reliably). The
+// amount-in-path format isn't openable by the Revolut app, so the buyer enters
+// the shown amount + reference.
+export function revolutPayLink(username: string): string | null {
+  const u = normalise(username, 'revolut\\.me');
+  return u ? `https://revolut.me/${u}` : null;
 }
 
-// PayPal.me link (paypal.me/<username>/<amount><CURRENCY>).
-export const PAYPAL_USERNAME = (process.env.NEXT_PUBLIC_PAYPAL_USERNAME || '')
-  .replace(/^@/, '')
-  .replace(/^https?:\/\/(www\.)?paypal\.me\//i, '')
-  .replace(/\/.*$/, '')
-  .trim();
-
-export function hasPaypal(): boolean {
-  return PAYPAL_USERNAME.length > 0;
-}
-
-export function paypalPayLink(amount: number, currency = 'GBP'): string | null {
-  if (!PAYPAL_USERNAME) return null;
+// PayPal.Me link with the amount pre-filled (reliable click-and-pay).
+export function paypalPayLink(username: string, amount: number, currency = 'GBP'): string | null {
+  const u = normalise(username, 'paypal\\.me');
+  if (!u) return null;
   const amt = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
-  return `https://paypal.me/${PAYPAL_USERNAME}/${amt}${currency.toUpperCase()}`;
+  return `https://paypal.me/${u}/${amt}${currency.toUpperCase()}`;
 }
 
-/** Pay link for a chosen method, or null if that method has no direct link. */
-export function payLinkFor(method: string, amount: number, currency = 'GBP'): string | null {
-  if (method === 'revolut') return revolutPayLink(amount, currency);
-  if (method === 'paypal') return paypalPayLink(amount, currency);
+/** Pay link for a chosen method using the shop's configured handles. */
+export function payLinkFor(
+  method: string,
+  config: { revolutUsername: string; paypalUsername: string },
+  amount: number,
+  currency = 'GBP'
+): string | null {
+  if (method === 'revolut') return revolutPayLink(config.revolutUsername);
+  if (method === 'paypal') return paypalPayLink(config.paypalUsername, amount, currency);
   return null;
 }

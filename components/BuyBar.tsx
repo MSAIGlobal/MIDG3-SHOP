@@ -1,8 +1,9 @@
 'use client';
 
-import { CONTACT_EMAIL, POSTAGE, WHATSAPP_NUMBER } from '@/lib/constants';
+import { POSTAGE } from '@/lib/constants';
 import { formatPrice } from '@/lib/format';
 import { useCart } from '@/lib/cart';
+import { useShopConfig } from './ConfigProvider';
 import type { Listing } from '@/lib/types';
 import { FavouriteButton } from './FavouriteButton';
 import { AddToCartButton, BuyNowButton } from './CartButtons';
@@ -14,16 +15,17 @@ import { BagIcon, CheckIcon } from './icons';
 // biggest conversion wins, so it never scrolls away.
 export function BuyBar({ listing }: { listing: Listing }) {
   const { has, add, remove } = useCart();
+  const { contactEmail, whatsapp } = useShopConfig();
   const sold = listing.status === 'sold';
   const total = listing.price + POSTAGE;
   const inCart = has(listing.id);
   const cartItem = { listingId: listing.id, title: listing.title, price: listing.price, image: listing.images[0] };
 
   const msg = `Hi! I'd love to buy the "${listing.title}" (${formatPrice(listing.price)} + ${formatPrice(POSTAGE)} postage = ${formatPrice(total)}) from MIDG3. Is it still available? 💕`;
-  const waHref = WHATSAPP_NUMBER
-    ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
+  const waHref = whatsapp
+    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`
     : null;
-  const mailHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+  const mailHref = `mailto:${contactEmail}?subject=${encodeURIComponent(
     `MIDG3 enquiry: ${listing.title}`
   )}&body=${encodeURIComponent(msg)}`;
   const messageHref = waHref ?? mailHref;

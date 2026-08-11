@@ -3,7 +3,7 @@
 import { createClient } from './supabase/client';
 import { payLinkFor } from './payments';
 import { POSTAGE, CURRENCY } from './constants';
-import type { CartItem } from './types';
+import type { CartItem, PublicShopConfig } from './types';
 
 export interface CheckoutResult {
   ref: string;
@@ -29,14 +29,15 @@ function makeRef(): string {
 // backend too — it still returns the pay link so Buy Now is never dead.
 export async function placeOrder(
   items: CartItem[],
-  buyer: { name?: string; email?: string; paymentMethod: string }
+  buyer: { name?: string; email?: string; paymentMethod: string },
+  config: Pick<PublicShopConfig, 'revolutUsername' | 'paypalUsername'>
 ): Promise<CheckoutResult> {
   const itemTotal = items.reduce((sum, i) => sum + i.price, 0);
   const postage = items.length ? POSTAGE : 0;
   const total = itemTotal + postage;
   const ref = makeRef();
   const paymentMethod = buyer.paymentMethod;
-  const payLink = payLinkFor(paymentMethod, total, CURRENCY);
+  const payLink = payLinkFor(paymentMethod, config, total, CURRENCY);
 
   let recorded = false;
   const supabase = createClient();
