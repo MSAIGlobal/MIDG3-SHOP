@@ -18,10 +18,10 @@ export const metadata: Metadata = {
     template: `%s · ${SHOP_NAME}`,
   },
   description:
-    'MIDG3 is a boutique of pre-loved treasures — hand-picked fashion, bags and homeware, described honestly and posted with care. Follow the shop for first dibs on new arrivals.',
+    'MIDG3 is a boutique of pre-loved homeware, beauty & fashion — hand-picked, described honestly and posted with care. Follow the shop for first dibs on new arrivals.',
   openGraph: {
     title: `${SHOP_NAME} — ${SHOP_TAGLINE}`,
-    description: 'Pre-loved treasures, hand-picked with love. New arrivals all the time.',
+    description: 'Pre-loved homeware, beauty & fashion. New arrivals all the time.',
     type: 'website',
   },
   icons: {
