@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getListing, getRelatedListings } from '@/lib/data';
 import { ImageGallery } from '@/components/ImageGallery';
@@ -14,21 +15,36 @@ import { findCategory, findSubCategory, POSTAGE } from '@/lib/constants';
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const listing = await getListing(params.id);
   if (!listing) return { title: 'Item not found' };
-  const hero = listing.images[0];
+
+  // Build absolute URLs from the ACTUAL host this page is served on, so shared
+  // links unfurl with the right domain + the item's main photo as the hero —
+  // whatever domain the shop runs on (Netlify subdomain or a custom domain).
+  const h = headers();
+  const host = h.get('x-forwarded-host') || h.get('host') || 'localhost:3000';
+  const proto = h.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
+  const origin = `${proto}://${host}`;
+  const url = `${origin}/item/${listing.id}`;
+  const raw = listing.images[0] || '/placeholder.svg';
+  const hero = raw.startsWith('http') ? raw : `${origin}${raw}`;
+
   const description = listing.description.slice(0, 155);
-  // The main photo is the hero image so shared links unfurl with it on socials.
+  const title = `${listing.title} · MIDG3`;
+
   return {
     title: listing.title,
     description,
+    alternates: { canonical: url },
     openGraph: {
-      title: `${listing.title} · MIDG3`,
+      title,
       description,
+      url,
+      siteName: 'MIDG3',
       type: 'website',
-      images: [{ url: hero, width: 1200, height: 1200, alt: listing.title }],
+      images: [{ url: hero, secureUrl: hero, width: 1200, height: 1200, alt: listing.title }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${listing.title} · MIDG3`,
+      title,
       description,
       images: [hero],
     },
