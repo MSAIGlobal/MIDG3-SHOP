@@ -33,6 +33,8 @@ export interface PublicShopConfig {
   paypalUsername: string;
   contactEmail: string;
   whatsapp: string;
+  facebookUrl: string;
+  instagramUrl: string;
 }
 
 export interface CartItem {
@@ -70,6 +72,8 @@ export interface Testimonial {
   author: string | null;
   rating: number; // 1–5
   created_at: string;
+  published?: boolean;
+  order_ref?: string | null;
 }
 
 export interface Profile {

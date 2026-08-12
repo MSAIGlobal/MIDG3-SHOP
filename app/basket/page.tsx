@@ -9,12 +9,16 @@ import { placeOrder, type CheckoutResult } from '@/lib/checkout';
 import { formatPrice } from '@/lib/format';
 import { POSTAGE, PAYMENT_METHODS, paymentMethodLabel, type PaymentMethodId } from '@/lib/constants';
 import { CardIcon, CheckIcon } from '@/components/icons';
+import { LeaveFeedback } from '@/components/LeaveFeedback';
+import { StayInTouch } from '@/components/StayInTouch';
 
 export default function BasketPage() {
   const { items, subtotal, remove, clear, ready } = useCart();
   const shopConfig = useShopConfig();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
   const [method, setMethod] = useState<PaymentMethodId | ''>('');
   const [busy, setBusy] = useState(false);
   const [placed, setPlaced] = useState<CheckoutResult | null>(null);
@@ -22,10 +26,18 @@ export default function BasketPage() {
   const postage = items.length ? POSTAGE : 0;
   const total = subtotal + postage;
 
+  const emailOk = /.+@.+\..+/.test(email.trim());
+  const detailsOk = name.trim().length > 1 && emailOk && address.trim().length > 5;
+  const canOrder = items.length > 0 && !!method && detailsOk;
+
   async function checkout() {
-    if (!items.length || !method || busy) return;
+    if (!canOrder || busy) return;
     setBusy(true);
-    const result = await placeOrder(items, { name, email, paymentMethod: method }, shopConfig);
+    const result = await placeOrder(
+      items,
+      { name: name.trim(), email: email.trim(), phone: phone.trim(), address: address.trim(), paymentMethod: method },
+      shopConfig
+    );
     setPlaced(result);
     clear();
     setBusy(false);
@@ -86,6 +98,14 @@ export default function BasketPage() {
           </p>
         )}
 
+        {/* Leave feedback (pending owner moderation) */}
+        <div className="pt-2 text-left">
+          <LeaveFeedback orderRef={placed.ref} defaultName={name.trim()} />
+        </div>
+
+        {/* Follow the shop + socials + save */}
+        <StayInTouch />
+
         <Link href="/shop" className="btn-ghost">Continue shopping</Link>
       </div>
     );
@@ -127,13 +147,37 @@ export default function BasketPage() {
         ))}
       </div>
 
-      {/* Your details */}
+      {/* Delivery details — required so Midge can post the order */}
       <div className="card space-y-3 p-5">
-        <h2 className="text-sm font-bold text-plum">Your details <span className="font-normal text-plum/40">· so Midge can post your order</span></h2>
+        <h2 className="text-sm font-bold text-plum">Delivery details</h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input className="input" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
-          <input className="input" type="email" placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <div>
+            <label className="label" htmlFor="b-name">Full name <span className="text-midg-500">*</span></label>
+            <input id="b-name" className="input" placeholder="Jane Smith" value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+          <div>
+            <label className="label" htmlFor="b-email">Email <span className="text-midg-500">*</span></label>
+            <input id="b-email" className="input" type="email" placeholder="you@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
         </div>
+        <div>
+          <label className="label" htmlFor="b-address">Full delivery address <span className="text-midg-500">*</span></label>
+          <textarea
+            id="b-address"
+            className="input min-h-[90px] resize-y"
+            placeholder="House number & street&#10;Town/City&#10;County&#10;Postcode"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label className="label" htmlFor="b-phone">Phone <span className="font-normal text-plum/40">· optional</span></label>
+          <input id="b-phone" className="input" type="tel" placeholder="For delivery updates" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </div>
+        {!detailsOk && (name || email || address) && (
+          <p className="text-xs text-midg-600">Please add your name, a valid email and full delivery address.</p>
+        )}
       </div>
 
       {/* How would you like to pay? (required) */}
@@ -186,13 +230,21 @@ export default function BasketPage() {
 
       <button
         onClick={checkout}
-        disabled={busy || !method}
+        disabled={busy || !canOrder}
         className="btn bg-[#0666eb] text-white shadow-soft hover:bg-[#0552c2] w-full"
       >
         <CardIcon width={20} height={20} />
-        {busy ? 'Placing order…' : !method ? 'Choose a payment method' : `Place order · ${formatPrice(total)}`}
+        {busy
+          ? 'Placing order…'
+          : !detailsOk
+          ? 'Add your delivery details'
+          : !method
+          ? 'Choose a payment method'
+          : `Place order · ${formatPrice(total)}`}
       </button>
-      {!method && <p className="text-center text-xs text-plum/45">Please choose how you’d like to pay to continue.</p>}
+      <p className="text-center text-xs text-plum/45">
+        Your address is only used to post your order. Payment is taken after you place the order.
+      </p>
     </div>
   );
 }
