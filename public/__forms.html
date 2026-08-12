@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>MIDG3 forms</title>
+  </head>
+  <body>
+    <!-- Detected by Netlify so order submissions are captured and emailed to
+         the shop owner (enable the email notification for this form in
+         Netlify → Forms → order-notification). -->
+    <form name="order-notification" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="order-notification" />
+      <input name="bot-field" />
+      <input type="text" name="reference" />
+      <input type="text" name="customer_name" />
+      <input type="email" name="customer_email" />
+      <input type="text" name="customer_phone" />
+      <textarea name="delivery_address"></textarea>
+      <textarea name="items"></textarea>
+      <input type="text" name="items_total" />
+      <input type="text" name="postage" />
+      <input type="text" name="order_total" />
+      <input type="text" name="payment_method" />
+    </form>
+  </body>
+</html>

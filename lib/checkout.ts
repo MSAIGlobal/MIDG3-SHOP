@@ -2,7 +2,7 @@
 
 import { createClient } from './supabase/client';
 import { payLinkFor } from './payments';
-import { POSTAGE, CURRENCY } from './constants';
+import { POSTAGE, CURRENCY, CURRENCY_SYMBOL } from './constants';
 import type { CartItem, PublicShopConfig } from './types';
 
 export interface CheckoutResult {
@@ -15,6 +15,14 @@ export interface CheckoutResult {
   recorded: boolean; // true if persisted to the backend (for HMRC statements)
 }
 
+export interface Buyer {
+  name: string;
+  email: string;
+  phone?: string;
+  address: string;
+  paymentMethod: string;
+}
+
 function makeRef(): string {
   const d = new Date();
   const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(
@@ -24,12 +32,26 @@ function makeRef(): string {
   return `MIDG3-${stamp}-${rand}`;
 }
 
-// Records an order (when the backend is connected) and returns the Revolut
-// payment link for the total (items + one flat postage). Works without a
-// backend too — it still returns the pay link so Buy Now is never dead.
+// Emails the shop owner the order + delivery details via Netlify Forms
+// (best-effort — never blocks the order). The owner enables the email
+// notification for the "order-notification" form in Netlify.
+async function notifyOwner(fields: Record<string, string>) {
+  try {
+    await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ 'form-name': 'order-notification', ...fields }).toString(),
+    });
+  } catch {
+    /* notification is best-effort */
+  }
+}
+
+// Records an order (when the backend is connected), emails the owner, and
+// returns the payment link for the total (items + one flat postage).
 export async function placeOrder(
   items: CartItem[],
-  buyer: { name?: string; email?: string; paymentMethod: string },
+  buyer: Buyer,
   config: Pick<PublicShopConfig, 'revolutUsername' | 'paypalUsername'>
 ): Promise<CheckoutResult> {
   const itemTotal = items.reduce((sum, i) => sum + i.price, 0);
@@ -48,6 +70,8 @@ export async function placeOrder(
         ref,
         buyer_name: buyer.name || null,
         buyer_email: buyer.email || null,
+        buyer_phone: buyer.phone || null,
+        buyer_address: buyer.address || null,
         item_total: itemTotal,
         postage,
         total,
@@ -69,6 +93,20 @@ export async function placeOrder(
       recorded = true;
     }
   }
+
+  const p = (n: number) => `${CURRENCY_SYMBOL}${n.toFixed(2)}`;
+  await notifyOwner({
+    reference: ref,
+    customer_name: buyer.name,
+    customer_email: buyer.email,
+    customer_phone: buyer.phone || '—',
+    delivery_address: buyer.address,
+    items: items.map((i) => `${i.title} (${p(i.price)})`).join('\n'),
+    items_total: p(itemTotal),
+    postage: p(postage),
+    order_total: p(total),
+    payment_method: paymentMethod,
+  });
 
   return { ref, itemTotal, postage, total, paymentMethod, payLink, recorded };
 }

@@ -158,9 +158,10 @@ export async function getTestimonials(): Promise<Testimonial[]> {
   const { data, error } = await supabase
     .from('testimonials')
     .select('id,quote,author,rating,created_at')
+    .eq('published', true)
     .order('created_at', { ascending: false });
 
-  // Real reviews only once connected — no fabricated testimonials on a live shop.
+  // Real, owner-approved reviews only — no fabricated or unmoderated content.
   if (error || !data) return [];
   return data as Testimonial[];
 }

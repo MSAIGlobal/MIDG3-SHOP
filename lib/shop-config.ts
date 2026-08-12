@@ -14,6 +14,8 @@ export async function getShopConfig(): Promise<PublicShopConfig> {
     paypalUsername: clean(process.env.NEXT_PUBLIC_PAYPAL_USERNAME),
     contactEmail: clean(process.env.NEXT_PUBLIC_CONTACT_EMAIL) || 'hello@midg3.shop',
     whatsapp: clean(process.env.NEXT_PUBLIC_WHATSAPP),
+    facebookUrl: clean(process.env.NEXT_PUBLIC_FACEBOOK_URL),
+    instagramUrl: clean(process.env.NEXT_PUBLIC_INSTAGRAM_URL),
   };
 
   if (!isSupabaseConfigured) return env;
@@ -29,6 +31,8 @@ export async function getShopConfig(): Promise<PublicShopConfig> {
       paypalUsername: clean(row.paypal_username) || env.paypalUsername,
       contactEmail: clean(row.contact_email) || env.contactEmail,
       whatsapp: clean(row.whatsapp) || env.whatsapp,
+      facebookUrl: clean(row.facebook_url) || env.facebookUrl,
+      instagramUrl: clean(row.instagram_url) || env.instagramUrl,
     };
   } catch {
     return env;

@@ -8,6 +8,8 @@ const DEFAULTS: PublicShopConfig = {
   paypalUsername: '',
   contactEmail: 'hello@midg3.shop',
   whatsapp: '',
+  facebookUrl: '',
+  instagramUrl: '',
 };
 
 const ConfigContext = createContext<PublicShopConfig>(DEFAULTS);
